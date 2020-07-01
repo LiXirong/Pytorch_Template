@@ -71,5 +71,5 @@ if __name__ == "__main__":
         torch.save(checkpoint, xxPATHxx)
         with torch.no_grad():
             #####some testing#####
-            rint("xxxxxxx".format(xxxxxxx))
+            print("xxxxxxx".format(xxxxxxx))
             #####some logging#####
