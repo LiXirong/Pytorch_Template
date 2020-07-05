@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import transforms
+import tqdm
 #============================#
 from networks import MyModel
 #============================#
@@ -19,8 +20,42 @@ device_ids = [0,1]
 
 torch.backends.cudnn.benchmark = True
 
-    
-if __name__ == "__main__":
+
+
+def test():
+    batch_size = 8
+
+    transform = transforms.Compose([
+        transforms.Resize([256, 256]),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+
+    dataset = xxxxxx
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, pin_memory=True, shuffle=True,num_workers=4)
+
+    #============================#
+    model = MyModel()
+    #============================#
+    model = nn.DataParallel(model, device_ids=device_ids).to(device)
+
+    predictions = []
+    total = 0
+    correct = 0
+    with torch.no_grad():
+        model.eval()
+        for data in tqdm(dataloader):
+            #####some testing#####
+            _, images, true_labels, _ = data
+            images = images.to(device)
+            outputs = model(images)
+            _, preds = torch.max(outputs.data, 1)
+            total += len(true_labels)
+            correct += preds.cpu().eq(true_labels.cpu().view_as(preds)).sum().item()
+            #####some logging#####
+    print(correct,total,correct/total)
+
+def train():
     #============================#
     model = MyModel()
     #============================#
@@ -57,7 +92,9 @@ if __name__ == "__main__":
     
     for epoch in range(start_epoch, num_epochs + 1):
         torch.cuda.empty_cache()
-        for i, data in enumerate(dataloader, 0):
+        i = 0
+        for data in tqdm(dataloader, 0):
+            i += 1
             model.train()
             model.zero_grad()
             optimizer.zero_grad()
@@ -89,3 +126,7 @@ if __name__ == "__main__":
             #####some testing#####
             print("xxxxxxx".format(xxxxxxx))
             #####some logging#####
+
+    
+if __name__ == "__main__":
+    train()
